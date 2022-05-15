@@ -1,0 +1,423 @@
+[
+    {
+        "id": "97fe7bfe.1327a8",
+        "type": "tab",
+        "label": "server Controll",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "92a36445.c57538",
+        "type": "debug",
+        "z": "97fe7bfe.1327a8",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 830,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "d46a92f4.cfe72",
+        "type": "http in",
+        "z": "97fe7bfe.1327a8",
+        "name": "",
+        "url": "/idle",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 200,
+        "y": 220,
+        "wires": [
+            [
+                "67f7d781.b8ade8"
+            ]
+        ]
+    },
+    {
+        "id": "7dacc3bc.35780c",
+        "type": "http in",
+        "z": "97fe7bfe.1327a8",
+        "name": "",
+        "url": "/setIdle",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 190,
+        "y": 260,
+        "wires": [
+            [
+                "f49adbb9.af2768"
+            ]
+        ]
+    },
+    {
+        "id": "9ed27d2f.23802",
+        "type": "http in",
+        "z": "97fe7bfe.1327a8",
+        "name": "",
+        "url": "/task",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 200,
+        "y": 300,
+        "wires": [
+            [
+                "2a90fd71.a56572",
+                "de18c600.6e0c28"
+            ]
+        ]
+    },
+    {
+        "id": "d296b2bb.56329",
+        "type": "http in",
+        "z": "97fe7bfe.1327a8",
+        "name": "",
+        "url": "/bot",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 200,
+        "y": 340,
+        "wires": [
+            [
+                "c2573c2d.8aaba"
+            ]
+        ]
+    },
+    {
+        "id": "c2573c2d.8aaba",
+        "type": "function",
+        "z": "97fe7bfe.1327a8",
+        "name": "",
+        "func": "var obj =  global.get(\"idle\");\nvar  task = global.get(\"task\")\nif(msg.payload.finish==\"false\"){\n   \n    obj[msg.payload.id] = false;\n    msg.payload = task[msg.payload.id]\n    msg.payload.test = \"test\"\n}else{\n    obj[msg.payload.id] = true;\n    task[msg.payload.id] = {\"mission\":\"none\",\"target\":\"none\"}\n    \n}\nglobal.set(\"task\",task)\nglobal.set(\"idle\",obj);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 470,
+        "y": 340,
+        "wires": [
+            [
+                "4998b724.1b4898",
+                "92a36445.c57538"
+            ]
+        ]
+    },
+    {
+        "id": "2a90fd71.a56572",
+        "type": "function",
+        "z": "97fe7bfe.1327a8",
+        "name": "",
+        "func": "var obj = global.get(\"task\")\n\nif(obj ===undefined)obj={}\nobj[msg.payload.id]=JSON.parse(msg.payload.task)\nglobal.set(\"task\",obj)\n\nreturn msg",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 470,
+        "y": 300,
+        "wires": [
+            [
+                "4998b724.1b4898"
+            ]
+        ]
+    },
+    {
+        "id": "f49adbb9.af2768",
+        "type": "function",
+        "z": "97fe7bfe.1327a8",
+        "name": "",
+        "func": "var obj = global.get(\"idle\")\nif(obj === undefined)obj={}\nobj[msg.payload.id] = true\n\nmsg.payload = obj\nglobal.set(\"idle\",obj)\nglobal.set(\"task\",undefined)\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 470,
+        "y": 260,
+        "wires": [
+            [
+                "4998b724.1b4898"
+            ]
+        ]
+    },
+    {
+        "id": "67f7d781.b8ade8",
+        "type": "function",
+        "z": "97fe7bfe.1327a8",
+        "name": "",
+        "func": "msg.payload = global.get(\"idle\")\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 470,
+        "y": 220,
+        "wires": [
+            [
+                "4998b724.1b4898"
+            ]
+        ]
+    },
+    {
+        "id": "4998b724.1b4898",
+        "type": "http response",
+        "z": "97fe7bfe.1327a8",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 810,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "be9aff57.6b4fc",
+        "type": "http in",
+        "z": "97fe7bfe.1327a8",
+        "name": "",
+        "url": "/getTargets",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 200,
+        "y": 180,
+        "wires": [
+            [
+                "71ae9d86.afaa74"
+            ]
+        ]
+    },
+    {
+        "id": "71ae9d86.afaa74",
+        "type": "function",
+        "z": "97fe7bfe.1327a8",
+        "name": "",
+        "func": "var task = global.get(\"task\")\nif(task === undefined){\n    msg.payload = {\"targets\":[]}\n}else{\n    var targets = []\n    Object.keys(task).forEach(f=>{\n        if(targets.indexOf(task[f][\"target\"])==-1&&task[f][\"target\"]!=\"none\"){\n            targets.push(task[f][\"target\"])\n        }\n    })\n    msg.payload = {\"targets\":targets}\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 470,
+        "y": 180,
+        "wires": [
+            [
+                "4998b724.1b4898"
+            ]
+        ]
+    },
+    {
+        "id": "6ab70a46.a4fc74",
+        "type": "http in",
+        "z": "97fe7bfe.1327a8",
+        "name": "",
+        "url": "/threads",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 210,
+        "y": 140,
+        "wires": [
+            [
+                "6147caeb.d5db94"
+            ]
+        ]
+    },
+    {
+        "id": "6147caeb.d5db94",
+        "type": "function",
+        "z": "97fe7bfe.1327a8",
+        "name": "",
+        "func": "global.set(\"maxThreads\",msg.payload.id)\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 490,
+        "y": 140,
+        "wires": [
+            [
+                "4998b724.1b4898",
+                "95b4e8f3.e024d8"
+            ]
+        ]
+    },
+    {
+        "id": "95b4e8f3.e024d8",
+        "type": "debug",
+        "z": "97fe7bfe.1327a8",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 860,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "78d70e75.83793",
+        "type": "debug",
+        "z": "97fe7bfe.1327a8",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 400,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "f2d460fc.a863",
+        "type": "function",
+        "z": "97fe7bfe.1327a8",
+        "name": "",
+        "func": "var task = global.get(\"task\")\nif(task === undefined){\n    msg.payload = {\"targets\":[]}\n}else{\n    var targets = []\n    Object.keys(task).forEach(f=>{\n        if(targets.indexOf(task[f][\"target\"])==-1&&task[f][\"target\"]!=\"none\"){\n            targets.push(task[f][\"target\"])\n        }\n    })\n    msg.payload = {\"targets\":targets}\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 470,
+        "y": 500,
+        "wires": [
+            [
+                "33d22e61.9f94d2"
+            ]
+        ]
+    },
+    {
+        "id": "33d22e61.9f94d2",
+        "type": "debug",
+        "z": "97fe7bfe.1327a8",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 780,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "43708705.a9e198",
+        "type": "inject",
+        "z": "97fe7bfe.1327a8",
+        "name": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 220,
+        "y": 500,
+        "wires": [
+            [
+                "f2d460fc.a863"
+            ]
+        ]
+    },
+    {
+        "id": "ae42085f.d82728",
+        "type": "function",
+        "z": "97fe7bfe.1327a8",
+        "name": "",
+        "func": "var s = global.get(\"task\")\n\n\nvar output = {}\nif(s !== undefined){\nObject.keys(s).forEach(f=>{\n    if(s[f].mission!=\"none\"){\n        var target= s[f].target\n        \n        if(Object.keys(output).indexOf(target)==-1){\n            output[target] = {\"missions\":[]}\n        }\n        if(output[target][\"missions\"].indexOf(s[f].mission)==-1){\n                output[target][\"missions\"].push(s[f].mission)\n            }\n    }\n})\nmsg.payload = JSON.stringify(output)\n}else{\n    msg.payload = JSON.stringify({\"home\":\"none\"})\n}\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 450,
+        "y": 440,
+        "wires": [
+            [
+                "4998b724.1b4898"
+            ]
+        ]
+    },
+    {
+        "id": "852254e.a1361a8",
+        "type": "inject",
+        "z": "97fe7bfe.1327a8",
+        "name": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 220,
+        "y": 580,
+        "wires": [
+            [
+                "de18c600.6e0c28"
+            ]
+        ]
+    },
+    {
+        "id": "4ac5bd8d.477ac4",
+        "type": "http in",
+        "z": "97fe7bfe.1327a8",
+        "name": "",
+        "url": "/targetMissions",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 210,
+        "y": 440,
+        "wires": [
+            [
+                "ae42085f.d82728",
+                "de18c600.6e0c28"
+            ]
+        ]
+    },
+    {
+        "id": "de18c600.6e0c28",
+        "type": "function",
+        "z": "97fe7bfe.1327a8",
+        "name": "",
+        "func": "var s = global.get(\"task\")\n\n\nvar output = {}\nif(s !== undefined){\nObject.keys(s).forEach(f=>{\n    if(s[f].mission!=\"none\"){\n        var target= s[f].target\n        \n        if(Object.keys(output).indexOf(target)==-1){\n            output[target] = {\"missions\":[]}\n        }\n        if(output[target][\"missions\"].indexOf(s[f].mission)==-1){\n                output[target][\"missions\"].push(s[f].mission)\n            }\n    }\n})\nmsg.payload =output\n}else{\n    msg.payload = \"empty\"\n}\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 470,
+        "y": 580,
+        "wires": [
+            [
+                "dfb7bd23.ec95"
+            ]
+        ]
+    },
+    {
+        "id": "dfb7bd23.ec95",
+        "type": "ui_template",
+        "z": "97fe7bfe.1327a8",
+        "group": "d76ae5fc.9f1638",
+        "name": "",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "format": "<div  id=\"Bitburner\">\n    \n    \n</div>\n\n<script>\n(function(scope) {\n    scope.$watch('msg', function(msg) {\n      if (msg) {\n          $(\"#Bitburner\").html(\"\")\n        Object.keys(msg.payload).forEach(f=>{\n            let item = document.createElement(\"div\")\n            let header = document.createElement(\"div\")\n            let content = document.createElement(\"div\")\n            let contentInner = document.createElement(\"ul\")\n            $(header).text(f)\n            msg.payload[f][\"missions\"].forEach(e=>{\n                let li = document.createElement(\"li\")\n                $(li).text(e)\n                $(contentInner).append(li)\n            })\n            $(content).append(contentInner)\n            $(item).append(header)\n            $(item).append(content)\n            $(\"#Bitburner\").append(item)\n        })\n        $(\"#my_\"+scope.$id).html(msg.payload);\n      }\n    });\n  })(scope);\n</script>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "templateScope": "local",
+        "x": 720,
+        "y": 580,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "d76ae5fc.9f1638",
+        "type": "ui_group",
+        "z": "",
+        "name": "active Servers",
+        "tab": "14206092.8c8cbf",
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "14206092.8c8cbf",
+        "type": "ui_tab",
+        "z": "",
+        "name": "Bitburner",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]
