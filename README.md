@@ -6,8 +6,6 @@
 
 I programed a interface which uses [Node-RED](https://nodered.org/) to control the Bots. With this setup i am able to graph out my current hack target.
 
-Furthermore did i develop the basic programs to manage the game (see the UpgradeHacknet.js)
-
 ## LuckysLib?
 
 This is a collection of functions that i found were of great use in all of my scripts.
