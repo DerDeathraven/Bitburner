@@ -1,4 +1,11 @@
-/** @param {NS} ns **/
+/** 
+ * @author DerDeathraven 
+ * @param {NS} ns 
+ * This is the main command center
+ * This script handles communication with the node-RED server and calculates the best targets
+ * {@link https://github.com/DerDeathraven}
+ * 
+ * **/
 import * as LB from "./LuckysLib.js"
 var threads = 0
 var t
@@ -51,6 +58,14 @@ export async function main(ns) {
 	}
 
 }
+
+/**
+ * 
+ * @param {Object} ns Game Namespace
+ * @param {Object} serverObj List of all servers with root access
+ * @param {Array<String>} ignore list of Servers to be ignored
+ * @returns 
+ */
 function getServerWithMaxMoney(ns,serverObj,ignore=[]){
 	let serverWithMaxMoney = ""
 	let lastMoney = 0
@@ -79,6 +94,12 @@ function getServerWithMaxMoney(ns,serverObj,ignore=[]){
 		})
 		return serverWithMaxMoney
 }
+
+/**
+ * 
+ * @param {Object} ns 
+ * @returns {Object} list of all servers with root access
+ */
 async function  getParams(ns){
 	
 	var serverArr = LB.getAllServers(ns)
@@ -87,24 +108,30 @@ async function  getParams(ns){
 	var threads = 0
 	serverArr.forEach(f=>{
 		if(ns.hasRootAccess(f)){
-			
-			rootArr.push(f)
+			rootArr.push(f);  //Collect all servers that i have root access on
 		}
 	})
 	
 	await LB.asyncForEach(rootArr,async target=>{
 		
-	serverObj[target] = ns.getServer(target)
-	serverObj[target]["threads"] = Math.floor(serverObj[target]["maxRam"] / ns.getScriptRam("Hack.js"))
-	threads +=  Math.floor(serverObj[target]["maxRam"] / ns.getScriptRam("Hack.js"))
-	
-	await ns.wget("http://localhost:1880/setIdle?id="+target,"idleservers.txt")
-	await ns.wget("http://localhost:1880/threads?id="+threads,"egal.txt")
-	
+        serverObj[target] = ns.getServer(target)
+        serverObj[target]["threads"] = Math.floor(serverObj[target]["maxRam"] / ns.getScriptRam("Hack.js")) //How much threads this server can handle
+        threads +=  Math.floor(serverObj[target]["maxRam"] / ns.getScriptRam("Hack.js")) //Global threads amount
+        await ns.wget("http://localhost:1880/setIdle?id="+target,"idleservers.txt") //Register this server with node-RED
+        await ns.wget("http://localhost:1880/threads?id="+threads,"egal.txt") //Rise node-RED thread count
+        
 	})
-	await ns.write("targetMission.txt",JSON.stringify({"home":"none"}),"w")
+	await ns.write("targetMission.txt",JSON.stringify({"home":"none"}),"w") //has somekind of use i think....
 	return serverObj
 }
+
+/**
+ * 
+ * @param {Object} server single server object
+ * @param {String} name Server Name
+ * @param {Object} ns Namespace
+ * @returns {Integer} Threads needed to grow target 
+ */
 function getgrowNeeded(server,name,ns){
 	server["moneyAvailable"] = ns.getServerMoneyAvailable(name)
 	let maxMoney = server["moneyMax"]
@@ -121,6 +148,14 @@ function getgrowNeeded(server,name,ns){
 		return 0
 	}
 }
+/**
+ * 
+ * @param {Integer} threads Total amount of threads
+ * @param {Object} serverObj All servers that i have access to
+ * @param {Object} ns Namespace
+ * @returns {Object} All servers that should be given the Job
+ */
+
 function getBestServer(threads,serverObj,ns){
 	
 	let threadsNeeded =  threads
@@ -150,6 +185,14 @@ function getBestServer(threads,serverObj,ns){
 	
 	return outputObj
 }
+
+/**
+ * 
+ * @param {Object} ns Namespace
+ * @param {Object} serverObj All servers that i have access to
+ * @param {String} serverWithMaxMoney Target
+ * @param {String} mission Which job to execute
+ */
 async function callServer(ns,serverObj,serverWithMaxMoney,mission){
 	var threads = 0
 	switch(mission){
@@ -175,25 +218,29 @@ async function callServer(ns,serverObj,serverWithMaxMoney,mission){
 
 	var servers = getBestServer(threads,serverObj,ns)
 			
-			await LB.asyncForEach(Object.keys(servers),async f=>{
+	await LB.asyncForEach(Object.keys(servers),async f=>{
 				
-				var task = JSON.stringify({"mission":mission,"target":serverWithMaxMoney})
-				await ns.wget("http://localhost:1880/task?id="+f+"&task="+task,"egal.txt")
-				await ns.exec("Hack.js",f,servers[f]["threads"],f)
-				ns.print("New Target: "+serverWithMaxMoney)
+        var task = JSON.stringify({"mission":mission,"target":serverWithMaxMoney})
+        await ns.wget("http://localhost:1880/task?id="+f+"&task="+task,"egal.txt")
+        await ns.exec("Hack.js",f,servers[f]["threads"],f)
+        ns.print("New Target: "+serverWithMaxMoney)
 				
-			})
+	})
 	
 }
+
+/**
+ * 
+ * @param {Object} ns Namespace
+ * @param {Object} serverObj All servers that i have access to
+ * @param {String} serverWithMaxMoney Target
+ * @param {Array<String>} ignore List of servers to ignore
+ */
 async function handleHackTarget(ns,serverObj,serverWithMaxMoney,ignore = []){
 	
 	await ns.wget("http://localhost:1880/targetMissions","targetMission.txt")
 	var rawData = ns.read("targetMission.txt")
-	
 	var t = JSON.parse(rawData)
-	
-	
-	
 	var mission = ""
 	var moneybool =  0<getgrowNeeded(serverObj[serverWithMaxMoney],serverWithMaxMoney,ns)
 	var hackbool = -1<ns.hackAnalyzeThreads(serverWithMaxMoney,serverObj[serverWithMaxMoney]["moneyAvailable"])

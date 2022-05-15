@@ -1,4 +1,11 @@
-/** @param {NS} ns **/
+/** 
+ * @author DerDeathraven
+ * {@link https://github.com/DerDeathraven}
+ * @param {NS} ns
+ * 
+ * gets his mission from the node-red
+ * 
+ *  **/
 export async function main(ns) {
 	var serverName = ns.args[0]
 	await ns.wget("http://localhost:1880/bot?id="+serverName+"&finish=false","task.txt")

@@ -1,4 +1,12 @@
-/** @param {NS} ns **/
+/**
+ * @author DerDeathraven
+ * {@link https://github.com/DerDeathraven}
+ * @param {NS} ns 
+ * 
+ * Functions that i use often
+ * 
+ * 
+ * **/
 
 export function createAllServerArr(ns,usedArr = [ns.getHostname()]){
 	
